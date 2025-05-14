@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naths FX-991MS Web Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #202124;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .calculator {
+      background: #2e2e2e;
+      border-radius: 10px;
+      padding: 20px;
+      width: 440px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    }
+    #display {
+      background: #111;
+      padding: 15px;
+      font-size: 1.4em;
+      text-align: right;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      overflow-x: auto;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    button {
+      font-size: 1em;
+      padding: 14px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #666;
+    }
+    .mode {
+      grid-column: span 6;
+      text-align: right;
+      margin-bottom: 8px;
+    }
+    .shift-active {
+      background: #ffcc00 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="mode">Mode: <span id="angleMode">DEG</span></div>
+    <div id="display">0</div>
+    <div class="buttons">
+      <button onclick="toggleShift()">SHIFT</button>
+      <button onclick="toggleAlpha()">ALPHA</button>
+      <button onclick="insert('ENG')">ENG</button>
+      <button onclick="insert('EXP')">EXP</button>
+      <button onclick="toggleAngleMode()">RAD</button>
+      <button onclick="clearDisplay()">AC</button>
+
+      <button onclick="insert('sin(')">sin</button>
+      <button onclick="insert('cos(')">cos</button>
+      <button onclick="insert('tan(')">tan</button>
+      <button onclick="insert('log(')">log</button>
+      <button onclick="insert('ln(')">ln</button>
+      <button onclick="insert('sqrt(')">√</button>
+
+      <button onclick="insert('^')">x^y</button>
+      <button onclick="insert('pi')">π</button>
+      <button onclick="insert('e')">e</button>
+      <button onclick="insert('abs(')">|x|</button>
+      <button onclick="insert('d/dx(')">d/dx</button>
+      <button onclick="insert('integrate(')">∫</button>
+
+      <button onclick="insert('7')">7</button>
+      <button onclick="insert('8')">8</button>
+      <button onclick="insert('9')">9</button>
+      <button onclick="insert('/')">÷</button>
+      <button onclick="insert('AND')">AND</button>
+      <button onclick="insert('OR')">OR</button>
+
+      <button onclick="insert('4')">4</button>
+      <button onclick="insert('5')">5</button>
+      <button onclick="insert('6')">6</button>
+      <button onclick="insert('*')">×</button>
+      <button onclick="insert('XOR')">XOR</button>
+      <button onclick="insert('NOT')">NOT</button>
+
+      <button onclick="insert('1')">1</button>
+      <button onclick="insert('2')">2</button>
+      <button onclick="insert('3')">3</button>
+      <button onclick="insert('-')">−</button>
+      <button onclick="insert('Ans')">Ans</button>
+      <button onclick="insert('CONST')">CONST</button>
+
+      <button onclick="insert('0')">0</button>
+      <button onclick="insert('.')">.</button>
+      <button onclick="insert('(')">(</button>
+      <button onclick="insert(')')">)</button>
+      <button onclick="insert('+')">+</button>
+      <button onclick="evaluateExpr()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let display = document.getElementById('display');
+    let angle = 'DEG';
+    let shift = false;
+    let alpha = false;
+    let lastAnswer = 0;
+
+    function toggleAngleMode() {
+      angle = angle === 'DEG' ? 'RAD' : 'DEG';
+      document.getElementById('angleMode').innerText = angle;
+    }
+
+    function toggleShift() {
+      shift = !shift;
+      alpha = false;
+    }
+
+    function toggleAlpha() {
+      alpha = !alpha;
+      shift = false;
+    }
+
+    function clearDisplay() {
+      display.innerText = '0';
+    }
+
+    function insert(value) {
+      if (value === 'Ans') {
+        value = lastAnswer;
+      } else if (value === 'CONST') {
+        value = '6.67430e-11'; // example: gravitational constant
+      } else if (value === 'ENG') {
+        const eng = Number(display.innerText).toExponential(3);
+        display.innerText = eng;
+        return;
+      } else if (value === 'EXP') {
+        value = 'e';
+      } else if (value === 'd/dx(') {
+        value = 'derivative(';
+      } else if (value === 'integrate(') {
+        value = 'integrate('; // needs full syntax input
+      }
+
+      if (display.innerText === '0') display.innerText = '';
+      display.innerText += value;
+    }
+
+    function evaluateExpr() {
+      let expr = display.innerText;
+      try {
+        // Replace custom syntax
+        expr = expr.replace(/pi/g, 'math.pi');
+        expr = expr.replace(/e/g, 'math.e');
+        expr = expr.replace(/Ans/g, lastAnswer);
+
+        // Angle handling
+        if (angle === 'DEG') {
+          expr = expr.replace(/sin\((.*?)\)/g, (_, g1) => `math.sin(math.unit(${g1}, 'deg'))`);
+          expr = expr.replace(/cos\((.*?)\)/g, (_, g1) => `math.cos(math.unit(${g1}, 'deg'))`);
+          expr = expr.replace(/tan\((.*?)\)/g, (_, g1) => `math.tan(math.unit(${g1}, 'deg'))`);
+        } else {
+          expr = expr.replace(/(sin|cos|tan)\(/g, 'math.$1(');
+        }
+
+        const result = math.evaluate(expr);
+        lastAnswer = result;
+        display.innerText = result;
+      } catch (err) {
+        display.innerText = 'Error';
+      }
+    }
+  </script>
+</body>
+</html>
+
