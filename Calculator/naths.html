@@ -3,191 +3,252 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Naths FX-991MS Web Calculator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <title>Nath Scientific Calculator</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #202124;
-      color: white;
+      font-family: 'Segoe UI', sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      background: #202124;
+      color: white;
+      margin: 0;
     }
     .calculator {
       background: #2e2e2e;
-      border-radius: 10px;
       padding: 20px;
-      width: 440px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+      width: 480px;
     }
     #display {
-      background: #111;
-      padding: 15px;
-      font-size: 1.4em;
+      width: 100%;
+      height: 60px;
+      background: #1c1c1c;
+      color: white;
+      font-size: 1.8rem;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
       text-align: right;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      overflow-x: auto;
+      box-sizing: border-box;
     }
     .buttons {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
+      gap: 10px;
     }
     button {
-      font-size: 1em;
-      padding: 14px;
-      background: #444;
-      color: white;
+      padding: 15px;
+      font-size: 1rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      background: #3c3f41;
+      color: white;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s ease;
     }
     button:hover {
-      background: #666;
+      background: #555;
     }
-    .mode {
-      grid-column: span 6;
+    button.operator {
+      background: #ff9500;
+    }
+    button.operator:hover {
+      background: #e08900;
+    }
+    button.equal {
+      background: #34c759;
+      grid-column: span 2;
+    }
+    button.equal:hover {
+      background: #28a745;
+    }
+    button.clear {
+      background: #ff3b30;
+    }
+    button.memory {
+      background: #4285f4;
+    }
+    button.memory:hover {
+      background: #357ae8;
+    }
+    button.mode {
+      background: #f4b400;
+    }
+    button.mode:hover {
+      background: #f39c12;
+    }
+    .mode-display {
       text-align: right;
-      margin-bottom: 8px;
-    }
-    .shift-active {
-      background: #ffcc00 !important;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="calculator">
-    <div class="mode">Mode: <span id="angleMode">DEG</span></div>
-    <div id="display">0</div>
-    <div class="buttons">
-      <button onclick="toggleShift()">SHIFT</button>
-      <button onclick="toggleAlpha()">ALPHA</button>
-      <button onclick="insert('ENG')">ENG</button>
-      <button onclick="insert('EXP')">EXP</button>
-      <button onclick="toggleAngleMode()">RAD</button>
-      <button onclick="clearDisplay()">AC</button>
 
-      <button onclick="insert('sin(')">sin</button>
-      <button onclick="insert('cos(')">cos</button>
-      <button onclick="insert('tan(')">tan</button>
-      <button onclick="insert('log(')">log</button>
-      <button onclick="insert('ln(')">ln</button>
-      <button onclick="insert('sqrt(')">√</button>
-
-      <button onclick="insert('^')">x^y</button>
-      <button onclick="insert('pi')">π</button>
-      <button onclick="insert('e')">e</button>
-      <button onclick="insert('abs(')">|x|</button>
-      <button onclick="insert('d/dx(')">d/dx</button>
-      <button onclick="insert('integrate(')">∫</button>
-
-      <button onclick="insert('7')">7</button>
-      <button onclick="insert('8')">8</button>
-      <button onclick="insert('9')">9</button>
-      <button onclick="insert('/')">÷</button>
-      <button onclick="insert('AND')">AND</button>
-      <button onclick="insert('OR')">OR</button>
-
-      <button onclick="insert('4')">4</button>
-      <button onclick="insert('5')">5</button>
-      <button onclick="insert('6')">6</button>
-      <button onclick="insert('*')">×</button>
-      <button onclick="insert('XOR')">XOR</button>
-      <button onclick="insert('NOT')">NOT</button>
-
-      <button onclick="insert('1')">1</button>
-      <button onclick="insert('2')">2</button>
-      <button onclick="insert('3')">3</button>
-      <button onclick="insert('-')">−</button>
-      <button onclick="insert('Ans')">Ans</button>
-      <button onclick="insert('CONST')">CONST</button>
-
-      <button onclick="insert('0')">0</button>
-      <button onclick="insert('.')">.</button>
-      <button onclick="insert('(')">(</button>
-      <button onclick="insert(')')">)</button>
-      <button onclick="insert('+')">+</button>
-      <button onclick="evaluateExpr()">=</button>
-    </div>
+<div class="calculator">
+  <div class="mode-display">
+    <span id="modeDisplay">Mode: DEG</span>
   </div>
+  <div id="display">0</div>
+  <div class="buttons">
+    <!-- Mode Toggle -->
+    <button onclick="toggleMode()" class="mode">DEG</button>
+    <button onclick="clearDisplay()" class="clear">C</button>
+    <button onclick="delChar()">⌫</button>
+    <button onclick="append('(')">(</button>
+    
+    <!-- Scientific Operations -->
+    <button onclick="append('Math.sin(')">sin</button>
+    <button onclick="append('Math.cos(')">cos</button>
+    <button onclick="append('Math.tan(')">tan</button>
+    <button onclick="append('Math.log10(')">log</button>
+    
+    <button onclick="append(')')">)</button>
+    <button onclick="append('Math.sqrt(')">√</button>
+    <button onclick="append('**2')">x²</button>
+    <button onclick="append('Math.E')">e</button>
 
-  <script>
-    let display = document.getElementById('display');
-    let angle = 'DEG';
-    let shift = false;
-    let alpha = false;
-    let lastAnswer = 0;
+    <!-- More Operations -->
+    <button onclick="append('Math.PI')">π</button>
+    <button onclick="append('**')">xʸ</button>
+    <button onclick="append('Math.pow(')">xⁿ</button>
+    <button onclick="append('Math.abs(')">|x|</button>
+    
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button onclick="append('/')">÷</button>
+    
+    <button onclick="append('Math.factorial(')">n!</button>
+    <button onclick="append('Math.cbrt(')">³√x</button>
+    <button onclick="append('Math.log(')">ln</button>
+    <button onclick="append('Math.exp(')">exp</button>
 
-    function toggleAngleMode() {
-      angle = angle === 'DEG' ? 'RAD' : 'DEG';
-      document.getElementById('angleMode').innerText = angle;
-    }
+    <!-- Numbers and Operators -->
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button onclick="append('*')">×</button>
+    
+    <button onclick="append('nCr')">nCr</button>
+    <button onclick="append('nPr')">nPr</button>
+    <button onclick="append('-')">−</button>
+    <button onclick="append('1')">1</button>
 
-    function toggleShift() {
-      shift = !shift;
-      alpha = false;
-    }
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button onclick="append('+')">+</button>
+    
+    <button onclick="append('Ans')">Ans</button>
+    <button onclick="append('0')">0</button>
+    <button onclick="append('.')">.</button>
+    
+    <button onclick="calculate()" class="equal">=</button>
 
-    function toggleAlpha() {
-      alpha = !alpha;
-      shift = false;
-    }
+    <!-- Memory Functions -->
+    <button onclick="memoryAdd()" class="memory">M+</button>
+    <button onclick="memoryRecall()" class="memory">MR</button>
+    <button onclick="memoryClear()" class="memory">MC</button>
+  </div>
+</div>
 
-    function clearDisplay() {
-      display.innerText = '0';
-    }
+<script>
+  let display = document.getElementById("display");
+  let memory = 0;
+  let mode = 'DEG';
+  let lastAnswer = null;
 
-    function insert(value) {
-      if (value === 'Ans') {
-        value = lastAnswer;
-      } else if (value === 'CONST') {
-        value = '6.67430e-11'; // example: gravitational constant
-      } else if (value === 'ENG') {
-        const eng = Number(display.innerText).toExponential(3);
-        display.innerText = eng;
-        return;
-      } else if (value === 'EXP') {
-        value = 'e';
-      } else if (value === 'd/dx(') {
-        value = 'derivative(';
-      } else if (value === 'integrate(') {
-        value = 'integrate('; // needs full syntax input
-      }
-
-      if (display.innerText === '0') display.innerText = '';
+  // Function to append input to the display
+  function append(value) {
+    if (display.innerText === "0" || display.innerText === "Error") {
+      display.innerText = value;
+    } else {
       display.innerText += value;
     }
+  }
 
-    function evaluateExpr() {
-      let expr = display.innerText;
-      try {
-        // Replace custom syntax
-        expr = expr.replace(/pi/g, 'math.pi');
-        expr = expr.replace(/e/g, 'math.e');
-        expr = expr.replace(/Ans/g, lastAnswer);
+  // Clear the display
+  function clearDisplay() {
+    display.innerText = "0";
+  }
 
-        // Angle handling
-        if (angle === 'DEG') {
-          expr = expr.replace(/sin\((.*?)\)/g, (_, g1) => `math.sin(math.unit(${g1}, 'deg'))`);
-          expr = expr.replace(/cos\((.*?)\)/g, (_, g1) => `math.cos(math.unit(${g1}, 'deg'))`);
-          expr = expr.replace(/tan\((.*?)\)/g, (_, g1) => `math.tan(math.unit(${g1}, 'deg'))`);
-        } else {
-          expr = expr.replace(/(sin|cos|tan)\(/g, 'math.$1(');
-        }
-
-        const result = math.evaluate(expr);
-        lastAnswer = result;
-        display.innerText = result;
-      } catch (err) {
-        display.innerText = 'Error';
-      }
+  // Delete last character
+  function delChar() {
+    if (display.innerText.length <= 1 || display.innerText === "Error") {
+      display.innerText = "0";
+    } else {
+      display.innerText = display.innerText.slice(0, -1);
     }
-  </script>
+  }
+
+  // Calculate the result of the expression
+  function calculate() {
+    let expression = display.innerText;
+    try {
+      // Handle Mode (DEG, RAD, GRAD)
+      if (mode === 'DEG') {
+        expression = expression.replace(/Math.sin\(([^)]+)\)/g, 'Math.sin(Math.PI * $1 / 180)');
+        expression = expression.replace(/Math.cos\(([^)]+)\)/g, 'Math.cos(Math.PI * $1 / 180)');
+        expression = expression.replace(/Math.tan\(([^)]+)\)/g, 'Math.tan(Math.PI * $1 / 180)');
+      } else if (mode === 'RAD') {
+        expression = expression.replace(/Math.sin\(([^)]+)\)/g, 'Math.sin($1)');
+        expression = expression.replace(/Math.cos\(([^)]+)\)/g, 'Math.cos($1)');
+        expression = expression.replace(/Math.tan\(([^)]+)\)/g, 'Math.tan($1)');
+      }
+
+      // Evaluate the expression
+      let result = eval(expression);
+      lastAnswer = result;
+      display.innerText = result;
+    } catch (e) {
+      display.innerText = "Error";
+    }
+  }
+
+  // Memory Add (M+)
+  function memoryAdd() {
+    try {
+      memory = eval(display.innerText);
+    } catch {
+      memory = 0;
+    }
+  }
+
+  // Memory Recall (MR)
+  function memoryRecall() {
+    display.innerText = memory;
+  }
+
+  // Memory Clear (MC)
+  function memoryClear() {
+    memory = 0;
+  }
+
+  // Toggle Mode (DEG, RAD)
+  function toggleMode() {
+    mode = (mode === 'DEG') ? 'RAD' : (mode === 'RAD' ? 'GRAD' : 'DEG');
+    document.getElementById("modeDisplay").innerText = "Mode: " + mode;
+  }
+  
+  // Optional: Keyboard Support
+  document.addEventListener("keydown", function (e) {
+    const key = e.key;
+    if (/\d/.test(key) || "+-*/().".includes(key)) {
+      append(key);
+    } else if (key === "Enter") {
+      e.preventDefault();
+      calculate();
+    } else if (key === "Backspace") {
+      delChar();
+    } else if (key === "Escape") {
+      clearDisplay();
+    }
+  });
+</script>
+
 </body>
 </html>
 
